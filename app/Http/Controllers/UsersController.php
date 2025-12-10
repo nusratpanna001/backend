@@ -17,6 +17,7 @@ class UsersController extends Controller
             'password' => 'required|min:6',
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
+            'role' => 'nullable|in:admin,user'
         ]);
 
         $user = User::create([
@@ -25,12 +26,16 @@ class UsersController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
+            'role' => $request->role ?? 'user'  // default user
         ]);
+
+        $token = $user->createToken("API_TOKEN")->plainTextToken;
 
         return response()->json([
             'status' => true,
             'message' => 'Registration successful',
-            'user' => $user
+            'user' => $user,
+            'token' => $token
         ], 201);
     }
 
@@ -51,10 +56,13 @@ class UsersController extends Controller
             ], 401);
         }
 
+        $token = $user->createToken("API_TOKEN")->plainTextToken;
+
         return response()->json([
             'status' => true,
             'message' => 'Login successful',
             'user' => $user,
+            'token' => $token
         ], 200);
     }
 }
